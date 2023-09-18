@@ -44,7 +44,10 @@ object ZStreamExperiments {
                 .mapZIOPar(3)(z => sleepThenPrint(concat(z.id, 1), z.sleepTime) *> ZIO.succeed(z)) // 1, 2, 3
                 .mapZIO { z => if (z.id == "3") ZIO.fail(new Exception("3 is bad")).either else ZIO.succeed(Right(z)) }
                 .rechunk(3)
-                .mapZIO((z: Either[Exception, Item]) => sleepThenPrint(concat(z.id, 2), 0L) *> ZIO.succeed(z))
+                .mapZIO((z: Either[Exception, Item]) => z match {
+                    case Right(item) => sleepThenPrint(concat(item.id, 2), 0L) *> ZIO.succeed(z)
+                    case Left(err) => sleepThenPrint(err.toString, 0L) *> ZIO.succeed(z)
+                })
                 .run(ZSink.drain)
         } yield ()
     }
