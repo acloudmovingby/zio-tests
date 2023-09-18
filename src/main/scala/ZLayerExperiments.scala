@@ -62,5 +62,11 @@ object ZLayerExperiments {
         } yield ()
     }
 
-
+    def run(): Unit = Main.run(
+        ZLayerExperiments.theProgram
+            .provide(
+                ZLayerExperiments.DatabaseLive.layer,
+                ZLayerExperiments.NumberGeneratorLive.layer
+            )
+    )
 }

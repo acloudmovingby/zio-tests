@@ -9,13 +9,7 @@ object Main extends App {
         }
     }
 
-    run(
-        ZLayerExperiments.theProgram
-        .provide(
-            ZLayerExperiments.DatabaseLive.layer,
-            ZLayerExperiments.NumberGeneratorLive.layer
-        )
-    )
-
-
+    //ZLayerExperiments.run()
+    //ZStreamExperiments.run()
+    QueueExperiments.run()
 }
