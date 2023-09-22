@@ -3,7 +3,7 @@ import zio._
 
 object QueueExperiments {
 
-    val q: UIO[Queue[Int]] = Queue.bounded[Int](100)
+    val q: UIO[Queue[Int]] = Queue.bounded[Int](5)
 
     val queueLayer: ZLayer[Any, Throwable, Queue[Int]] = ZLayer {
         Console.printLine("Creating queue") *> q
@@ -31,10 +31,19 @@ object QueueExperiments {
         queue <- ZIO.service[Queue[Int]]
         _ <- Console.printLine("Enter a number")
         input <- Console.readLine
-        parsed <- ZIO.attempt(input.toInt)
-        _ <- queue.offer(parsed)
-        size <- queue.size
-        _ <- Console.printLine(s"Queue size=$size")
+        _ <- input match {
+            case "stop" => for {
+                size <- queue.size
+                _ <- Console.printLine(s"Queue size=$size. Shutting down...")
+                _ <- ZIO.sleep(100.millis).repeatUntilZIO(_ => queue.isEmpty).flatMap(_ => queue.shutdown)
+            } yield ()
+            case _ => for {
+                parsed <- ZIO.attempt(input.toInt)
+                _ <- queue.offer(parsed)
+                size <- queue.size
+                _ <- Console.printLine(s"Queue size=$size")
+            } yield ()
+        }
     } yield ()
 
     val takeFromQueue: ZIO[Queue[Int], Throwable, Unit] = for {
@@ -50,30 +59,12 @@ object QueueExperiments {
                 .repeat(Schedule.spaced(200.millis) >>> Schedule.recurs(5))
                 .repeat(Schedule.spaced(10.second)) // every 10 seconds flushes 5 items from queue
                 .fork
-            _ <- Console.printLine("Does print")
             _ <- offer.join // necessary
-            _ <- Console.printLine("Never prints")
-            //_ <- take.join // why NOT necessary??
-            _ <- Console.printLine("Never prints")
+            _ <- take.join // why NOT necessary??
         } yield ()
     }
 
-    def printStr(s: String) = Console.printLine(s)
-
-    val theProgram2 = for {
-        a <- Console.printLine("A").fork
-        b <- {
-            ZIO.sleep(15.second) *> Console.printLine("B")
-        }.fork
-        c <- {
-            ZIO.sleep(5.second) *> Console.printLine("C").fork
-        }
-        _ <-a.join
-    } yield ()
-
-
     def run(): Unit = Main.run(
-        theProgram2
-        //theProgram.provideLayer(queueLayer)
+        theProgram.provideLayer(queueLayer)
     )
 }

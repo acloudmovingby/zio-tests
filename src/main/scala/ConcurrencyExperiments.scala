@@ -23,7 +23,20 @@ object ConcurrencyExperiments {
         _ <- Console.printLine(s"Ending printConcurrently. Time elapsed=${end - begin}")
     } yield ()
 
+
+    val theProgram2 = for {
+        a <- Console.printLine("A").fork
+        b <- {
+            ZIO.sleep(15.second) *> Console.printLine("B")
+        }.fork
+        c <- {
+            ZIO.sleep(5.second) *> Console.printLine("C").fork
+        }
+        _ <- a.join
+    } yield ()
+
     def run(): Unit = Main.run(
+        //theProgram2
         printConcurrently
     )
 }
