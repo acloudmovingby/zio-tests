@@ -9,11 +9,12 @@ object Main extends App {
         }
     }
 
+    FailureExperiments.run()
     //ZLayerExperiments.run()
     //ParallelProcessingExperiments.run()
     //ZStreamExperiments.run()
     //QueueExperiments.run()
     //ConcurrencyExperiments.run()
     //ZStreamFromQueueExperiments.run()
-    RepeatExperiments.run()
+    //RepeatExperiments.run()
 }
