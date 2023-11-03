@@ -9,7 +9,7 @@ object Main extends App {
         }
     }
 
-    //FailureExperiments.run()
+    FailureExperiments.run()
     //ZLayerExperiments.run()
     //ParallelProcessingExperiments.run()
     //ZStreamExperiments.run()
@@ -22,5 +22,5 @@ object Main extends App {
     //MapChunkExperiments.run()
     //IntermittentLoggingZStream.run()
     //GroupByKey.run()
-    Broadcast.run()
+    //Broadcast.run()
 }
