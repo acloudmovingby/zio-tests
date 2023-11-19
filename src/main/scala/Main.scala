@@ -9,7 +9,7 @@ object Main extends App {
         }
     }
 
-    FailureExperiments.run()
+    //FailureExperiments.run()
     //ZLayerExperiments.run()
     //ParallelProcessingExperiments.run()
     //ZStreamExperiments.run()
@@ -23,4 +23,5 @@ object Main extends App {
     //IntermittentLoggingZStream.run()
     //GroupByKey.run()
     //Broadcast.run()
+    ZStreamTiming.run()
 }

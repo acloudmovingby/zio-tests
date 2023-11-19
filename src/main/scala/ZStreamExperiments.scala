@@ -40,6 +40,7 @@ object ZStreamExperiments {
         for {
             _ <- Console.printLine("The Stream:")
             _ <- finiteItemStream
+                .tap(i => Console.printLine(i))
                 .rechunk(3) // waits for all 3 to be ready?
                 .mapZIOPar(3)(z => sleepThenPrint(concat(z.id, 1), z.sleepTime) *> ZIO.succeed(z)) // 1, 2, 3
                 .mapZIO { z => if (z.id == "3") ZIO.fail(new Exception("3 is bad")).either else ZIO.succeed(Right(z)) }
