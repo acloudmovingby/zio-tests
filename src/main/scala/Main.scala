@@ -1,5 +1,8 @@
 import zio.{ZIO, _}
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 object Main extends App {
 
     def run[E, A](program: ZIO[Any, E, A]): Unit = Unsafe.unsafe { implicit unsafe =>
@@ -23,5 +26,7 @@ object Main extends App {
     //IntermittentLoggingZStream.run()
     //GroupByKey.run()
     //Broadcast.run()
-    ZStreamTiming.run()
+    //ZStreamTiming.run()
+    //ConsoleInputStream.run()
+    ZStreamFailure.run()
 }

@@ -29,7 +29,7 @@ object QueueExperiments {
 
     val readInputOfferToQueue: ZIO[Queue[Int], Throwable, Unit] = for {
         queue <- ZIO.service[Queue[Int]]
-        _ <- Console.printLine("Enter a number")
+        _ <- Console.printLine("Enter a number or type \"exit\" to stop running program.")
         input <- Console.readLine
         _ <- input match {
             case "stop" => for {
@@ -39,26 +39,33 @@ object QueueExperiments {
             } yield ()
             case _ => for {
                 parsed <- ZIO.attempt(input.toInt)
+                _ <- Console.printLine(s"Offering item to queue (item=$parsed)")
                 _ <- queue.offer(parsed)
                 size <- queue.size
-                _ <- Console.printLine(s"Queue size=$size")
+                _ <- Console.printLine(s"Current queue size=$size")
             } yield ()
         }
     } yield ()
 
     val takeFromQueue: ZIO[Queue[Int], Throwable, Unit] = for {
         queue <- ZIO.service[Queue[Int]]
-        _ <- queue.take.flatMap(i => Console.printLine(s"TAKING FROM QUEUE: ${i.toString}"))
+        _ <- queue.take.flatMap(i => Console.printLine(s"Removing item from queue. (item=${i.toString})"))
     } yield ()
 
     val theProgram: ZIO[Queue[Int], Throwable, Unit] = {
         for {
             offer <- readInputOfferToQueue.repeat(Schedule.forever) // asks for number on console, adds to queue
                 .fork
-            take <- takeFromQueue
-                .repeat(Schedule.spaced(200.millis) >>> Schedule.recurs(5))
-                .repeat(Schedule.spaced(10.second)) // every 10 seconds flushes 5 items from queue
-                .fork
+            take <- {
+                // every x seconds flush y items from queue if able (flushing at interval of z millis per item)
+                val x = 5.second
+                val y = 5
+                val z = 200.millis
+                takeFromQueue
+                    .repeat(Schedule.spaced(z) >>> Schedule.recurs(y))
+                    .repeat(Schedule.spaced(x))
+                    .fork
+            }
             _ <- offer.join // necessary
             _ <- take.join // why NOT necessary??
         } yield ()
