@@ -1,5 +1,7 @@
-import zio.{ZIO, _}
+import zio._
+import zio.stream.ZStream
 
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -19,4 +21,9 @@ object Utils {
             .format(new Date(java.lang.System.currentTimeMillis()))
         Console.printLine(s"$time: $msg")
     }
+
+    def streamFromConsoleInput(): ZStream[Any, IOException, String] =
+        ZStream.repeatZIO(Console.readLine)
+    def streamFromConsoleInput(prompt: String): ZStream[Any, IOException, String] =
+        ZStream.repeatZIO(Console.readLine(prompt))
 }

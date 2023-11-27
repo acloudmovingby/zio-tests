@@ -12,7 +12,7 @@ object Main extends App {
         }
     }
 
-    FailureExperiments.run()
+    //FailureExperiments.run()
     //ZLayerExperiments.run()
     //ParallelProcessingExperiments.run()
     //ZStreamExperiments.run()
@@ -29,4 +29,7 @@ object Main extends App {
     //ZStreamTiming.run()
     //ConsoleInputStream.run()
     //ZStreamFailure.run()
+    //EnsuringExperiment.run()
+    //ScopeExperiment.run()
+    MinimalScopeExample.run()
 }
