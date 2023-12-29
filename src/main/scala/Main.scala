@@ -31,5 +31,7 @@ object Main extends App {
     //ZStreamFailure.run()
     //EnsuringExperiment.run()
     //ScopeExperiment.run()
-    MinimalScopeExample.run()
+    //ForkDaemon.run()
+    //MinimalScopeExample.run()
+    ZStreamASBSender.run()
 }
