@@ -1,24 +1,49 @@
 import zio._
-import zio.stream.{ZSink, ZStream}
+import zio.stream.{ZPipeline, ZSink, ZStream}
 
 import java.io.IOException
 
 object ZStreamASBSender {
-    val emptyStream: ZStream[Any, Nothing, Nothing] = ZStream.empty
-    val oneIntValueStream: ZStream[Any, Nothing, Int] = ZStream.succeed(4)
-    val oneListValueStream: ZStream[Any, Nothing, List[Int]] = ZStream.succeed(List(1, 2, 3))
-    val finiteIntStream: ZStream[Any, Nothing, Int] = ZStream.range(1, 10)
-    val infiniteIntStream: ZStream[Any, Nothing, Int] = ZStream.iterate(1)(_ + 1)
-    val scheduledStream: ZStream[Any, Nothing, Long] = ZStream.fromSchedule(Schedule.spaced(1.second) >>> Schedule.recurs(10))
-    val scheduledAlphabetStream: ZStream[Any, Nothing, String] = ZStream("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
-        .schedule(Schedule.spaced(2.second))
+
+    val numInts = 27
+    val parallelism = 2
+    val finiteIntStream: ZStream[Any, Nothing, Int] = ZStream.range(1, numInts)
+
+    class Batch {
+
+        val id: Int = scala.util.Random.nextInt(1000)
+
+        val maxBatchSize = 3
+        var counter = 0
+
+        def add(id: Int): Boolean = {
+            counter += 1
+            counter < maxBatchSize
+        }
+        def send(): Unit = Thread.sleep(100)
+    }
+
+    var counter = 0
+
+    val schedge = Schedule.fixed(5.seconds).jittered
 
     val theProgram: ZIO[Any, Throwable, Unit] = for {
-        _ <- Console.printLine("Starting the stream!")
-        _ <- finiteIntStream
-            .mapZIO(i => Console.printLine(i.toString))
+        _ <- Console.printLine("Starting the stream!\n")
+        startTime <- Clock.nanoTime
+        foo <- finiteIntStream
+            .aggregateAsync(ZSink.foldWeighted[Int, Long](0)((acc: Long, i: Int) => acc, 10) { (acc, i) =>
+                    println(s"i=$i, acc=$acc")
+                    acc + i
+            })
+            .tap(i => Console.printLine(s"result=$i"))
             .run(ZSink.drain)
-
+        foo <- finiteIntStream
+            .mapAccum("")((s: String, i: Int) => (s + i.toString, s + i.toString))
+            .tap(i => Console.printLine(s"result=$i"))
+            .run(ZSink.drain)
+        _ <- Console.printLine(s"foo = $foo")
+        endTime <- Clock.nanoTime
+        _ <- Console.printLine(s"Elapsed time = ${(endTime - startTime).floatValue() / 1000000000F}, non-parallel, would've taken ${numInts} seconds")
     } yield ()
 
     def run(): Unit = Main.run(

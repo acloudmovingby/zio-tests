@@ -1,20 +1,28 @@
 import zio._
 import zio.stream.{ZSink, ZStream}
 
+import java.io.IOException
+
 object ZStreamFromQueueExperiments {
 
-    val theProgram = for {
-        _ <- Console.printLine("Starting theProgram")
+    def startQueue: ZIO[Any, IOException, Queue[Int]] = for {
+        _ <- Console.printLine("Starting Queue...")
         q <- Queue.bounded[Int](100)
-        items = Range.inclusive(1, 100).toList
-        offer <- q.offerAll(items).fork
         _ <- ZStream.fromQueue(q)
             .mapZIOPar(100) {i =>
                 ZIO.sleep(scala.util.Random.nextLong(1000).millis) *>
-                Console.printLine(i.toString)
+                Console.printLine(s"From queue: ${i.toString}")
             }
             .run(ZSink.drain)
-        _ <- offer.join
+    } yield q
+
+    val theProgram = for {
+        _ <- Console.printLine("Starting theProgram")
+        q <- startQueue
+        items = Range.inclusive(1, 10).toList
+        _ <- Console.printLine(s"Before offering items")
+        _ <- q.offerAll(items)
+        _ <- Console.printLine(s"After offering items")
     } yield ()
 
 

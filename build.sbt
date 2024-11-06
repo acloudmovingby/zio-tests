@@ -7,6 +7,8 @@ scalaVersion := "2.13.8"
 
 // ============================================================================
 
+// var recompileOnMacroDef = true
+
 // Lines like the above defining `scalaVersion` are called "settings". Settings
 // are key/value pairs. In the case of `scalaVersion`, the key is "scalaVersion"
 // and the value is "2.13.8"
@@ -28,6 +30,9 @@ version := "1.0"
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1"
 libraryDependencies += "dev.zio" %% "zio" % "2.0.16"
 libraryDependencies += "dev.zio" %% "zio-streams" % "2.0.16"
+libraryDependencies += "dev.zio" %% "zio-test"          % "2.1.2"
+libraryDependencies += "dev.zio" %% "zio-test-sbt"      % "2.1.2"
+libraryDependencies += "dev.zio" %% "zio-test-magnolia" % "2.1.2"
 
 // Here, `libraryDependencies` is a set of dependencies, and by using `+=`,
 // we're adding the scala-parser-combinators dependency to the set of dependencies
@@ -39,6 +44,11 @@ libraryDependencies += "dev.zio" %% "zio-streams" % "2.0.16"
 // `libraryDependencies` set, which in the above example looks like this:
 
 // "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1"
+
+addCompilerPlugin("org.virtuslab.semanticgraphs" % "scalac-plugin" % "0.2.20" cross CrossVersion.full)
+scalacOptions += "-Yrangepos"
+
+//addSbtPlugin("org.virtuslab.semanticgraphs" % "sbt-plugin" % "0.2.15")
 
 // You can use Scaladex, an index of all known published Scala libraries. There,
 // after you find the library you want, you can just copy/paste the dependency
