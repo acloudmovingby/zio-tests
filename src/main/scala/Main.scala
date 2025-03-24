@@ -9,9 +9,11 @@ object Main extends App {
         }
     }
 
+    Sandbox.run()
     //FailureExperiments.run()
     //ZLayerExperiments.run()
     //ParallelProcessingExperiments.run()
+    //ScheduleExperiments.run()
     //ZStreamExperiments.run()
     //QueueExperiments.run()
     //ConcurrencyExperiments.run()
@@ -32,7 +34,7 @@ object Main extends App {
     //MinimalScopeExample.run()
     //ZStreamASBSender.run()
     //RunToFuture.run()
-    Foo2.playWithWaitNotify()
+    //Foo2.playWithWaitNotify()
     //BufferOnZStream.run()
     //RunningFold.run()
     //StartQueueStreamAsync.run()

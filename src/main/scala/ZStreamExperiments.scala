@@ -42,14 +42,23 @@ object ZStreamExperiments {
             _ <- finiteItemStream
                 .tap(i => Console.printLine(i))
                 .rechunk(3) // waits for all 3 to be ready?
-                .mapZIOPar(3)(z => sleepThenPrint(concat(z.id, 1), z.sleepTime) *> ZIO.succeed(z)) // 1, 2, 3
-                .mapZIO { z => if (z.id == "3") ZIO.fail(new Exception("3 is bad")).either else ZIO.succeed(Right(z)) }
+                .mapZIOPar(3)(z => sleepThenPrint(concat(z.id, 1), z.sleepTime).as(z)) // 1, 2, 3
+                .mapZIO { z => if (z.id == "3") {
+                    throw new Exception("BluhBluh ExceptioNN!")
+                    ZIO.fail(new Exception("3 is bad")).either
+                } else ZIO.right(z) }
                 .rechunk(3)
                 .mapZIO((z: Either[Exception, Item]) => z match {
                     case Right(item) => sleepThenPrint(concat(item.id, 2), 0L) *> ZIO.succeed(z)
                     case Left(err) => sleepThenPrint(err.toString, 0L) *> ZIO.succeed(z)
                 })
+                //.onError(cause => ZIO.succeed(Console.printLine(s"Error!: ${cause.prettyPrint}")))
+                .catchAllCause { cause =>
+                    println(s"Magic Error!: ${cause.prettyPrint}")
+                    ZStream.empty
+                }
                 .run(ZSink.drain)
+                .exit
         } yield ()
     }
 
